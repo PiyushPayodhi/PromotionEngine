@@ -73,14 +73,16 @@ namespace PromoEngine.BAL
             {
                 foreach (var cartItem in CartList.FindAll(c => !c.IsCheckedOut))
                 {
+                    promoApplied = false;
+                    sku1Price = SKUList.Find(sku => sku.SKUId == cartItem.SKU).SKUPrice;
+                    actualPrice += sku1Price * cartItem.Quantity;
+                    
                     //If item is already checkedout, pick next.
                     if (cartItem.IsCheckedOut)
                     {
                         continue;
                     }
-                    promoApplied = false;
-                    sku1Price = SKUList.Find(sku => sku.SKUId == cartItem.SKU).SKUPrice;
-                    actualPrice += sku1Price * cartItem.Quantity;
+                    
                     foreach (var promotion in PromoList)
                     {
                         //For promotions with single SKU item

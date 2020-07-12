@@ -2,18 +2,14 @@
 using System.Collections.Generic;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using PromoEngine.BAL;
-using Xunit;
 
 namespace PromoEngine.Test
 {
+    [TestClass]
     public class PromoEngineTest
     {
-        public PromoEngineTest()
-        {
-
-        }
         
-        [Fact]
+        [TestMethod]
         public void TestCaseCart1()
         {
             //A = 1, B = 1, C = 1
@@ -23,10 +19,10 @@ namespace PromoEngine.Test
 
             (decimal actualPrice, decimal promoPrice) = promotionEngine.PromoCalculator();
 
-            Assert.Equals(orginalPrice, actualPrice);
-            Assert.Equals(expectedPrice, promoPrice);
+            Assert.AreEqual(orginalPrice, actualPrice);
+            Assert.AreEqual(expectedPrice, promoPrice);
         }
-        [Fact]
+        [TestMethod]
         public void TestCaseCart2()
         {
             //A = 5, B = 5, C = 1
@@ -36,21 +32,21 @@ namespace PromoEngine.Test
 
             (decimal actualPrice, decimal promoPrice) = promotionEngine.PromoCalculator();
 
-            Assert.Equals(orginalPrice, actualPrice);
-            Assert.Equals(expectedPrice, promoPrice);
+            Assert.AreEqual(orginalPrice, actualPrice);
+            Assert.AreEqual(expectedPrice, promoPrice);
         }
-        [Fact]
+        [TestMethod]
         public void TestCaseCart3()
         {
             //A = 3, B = 5, C = 1, D = 1
             PromotionEngine promotionEngine = new PromotionEngine();
             FillCartList3(promotionEngine);
-            decimal orginalPrice = 335m, expectedPrice = 100m;
+            decimal orginalPrice = 335m, expectedPrice = 280m;
 
             (decimal actualPrice, decimal promoPrice) = promotionEngine.PromoCalculator();
 
-            Assert.Equals(orginalPrice, actualPrice);
-            Assert.Equals(expectedPrice, promoPrice);
+            Assert.AreEqual(orginalPrice, actualPrice);
+            Assert.AreEqual(expectedPrice, promoPrice);
         }
         public void FillCartList1(PromotionEngine promotionEngine)
         {
