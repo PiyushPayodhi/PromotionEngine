@@ -48,8 +48,34 @@ namespace PromoEngine.BAL
         }
         public decimal PromoCalculator()
         {
-            decimal promoPrice = 0m;
-            //Apply promotions on cart and determine promoPrice.
+            decimal actualPrice = 0m, promoPrice = 0m, sku1Price = 0m;
+            bool promoApplied = false;
+            foreach (var cartItem in CartList)
+            {
+                promoApplied = false; 
+                sku1Price = SKUList.Find(sku => sku.SKUId == cartItem.SKU).SKUPrice;
+                actualPrice += sku1Price * cartItem.Quantity;
+                foreach (var promotion in PromoList)
+                {
+                    //For promotions with single SKU item
+                    if (promotion.SKU2.Equals('\0'))
+                    {
+                        if (promotion.SKU1 == cartItem.SKU && promotion.SKU1Unit <= cartItem.Quantity)
+                        {
+                            promoPrice += promotion.PromoPrice * (cartItem.Quantity / promotion.SKU1Unit);
+                            promoPrice += (cartItem.Quantity % promotion.SKU1Unit) * sku1Price;
+                            promoApplied = true;
+                            break;
+                        }
+                    }
+                }
+
+                //When no promotion is applied, calculate actual price
+                if (!promoApplied)
+                {
+                    promoPrice += (cartItem.Quantity) * sku1Price;
+                }
+            }
             return promoPrice;
         }
     }
