@@ -48,7 +48,7 @@ namespace PromoEngine.BAL
         }
         public decimal PromoCalculator()
         {
-            decimal actualPrice = 0m, promoPrice = 0m, sku1Price = 0m;
+            decimal actualPrice = 0m, promoPrice = 0m, sku1Price = 0m, sku2Price = 0m;
             bool promoApplied = false;
             foreach (var cartItem in CartList)
             {
@@ -62,10 +62,43 @@ namespace PromoEngine.BAL
                     {
                         if (promotion.SKU1 == cartItem.SKU && promotion.SKU1Unit <= cartItem.Quantity)
                         {
+                            //Items with promo
                             promoPrice += promotion.PromoPrice * (cartItem.Quantity / promotion.SKU1Unit);
+
+                            //Items without promo
                             promoPrice += (cartItem.Quantity % promotion.SKU1Unit) * sku1Price;
+
                             promoApplied = true;
                             break;
+                        }
+                    }
+                    //For promotions with multiple SKU items
+                    else
+                    {
+                        if (promotion.SKU1 == cartItem.SKU && promotion.SKU1Unit <= cartItem.Quantity)
+                        {
+                            foreach (var cartItem2 in CartList)
+                            {
+                                if (promotion.SKU2 == cartItem2.SKU && promotion.SKU2Unit <= cartItem2.Quantity)
+                                {
+                                    sku2Price = SKUList.Find(sku => sku.SKUId == cartItem2.SKU).SKUPrice;
+                                    
+                                    //Number of times a given promotion needs to be applied.
+                                    var totalPromo = Math.Min((cartItem.Quantity / promotion.SKU1Unit), (cartItem2.Quantity / promotion.SKU2Unit));
+
+                                    //SKU1 and SKU2 items wit promo
+                                    promoPrice += promotion.PromoPrice * totalPromo;
+
+                                    //SKU1 items without promo
+                                    promoPrice += (cartItem.Quantity % promotion.SKU1Unit) * sku1Price;
+                                    
+                                    //SKU2 items without promo
+                                    promoPrice += (cartItem2.Quantity % promotion.SKU2Unit) * sku2Price;
+
+                                    promoApplied = true;
+                                    break;
+                                }
+                            }
                         }
                     }
                 }
