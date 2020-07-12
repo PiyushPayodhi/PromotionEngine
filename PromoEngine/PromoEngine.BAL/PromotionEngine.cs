@@ -19,114 +19,136 @@ namespace PromoEngine.BAL
         }
         public void FillSKUList()
         {
-            //Populate all the SKU items
-            SKUList = new List<SKU>();
-            SKUList.Add(new SKU() { SKUId = 'A', SKUPrice = 50m });
-            SKUList.Add(new SKU() { SKUId = 'B', SKUPrice = 30m });
-            SKUList.Add(new SKU() { SKUId = 'C', SKUPrice = 20m });
-            SKUList.Add(new SKU() { SKUId = 'D', SKUPrice = 15m });
+            try
+            {
+                //Populate all the SKU items
+                SKUList = new List<SKU>();
+                SKUList.Add(new SKU() { SKUId = 'A', SKUPrice = 50m });
+                SKUList.Add(new SKU() { SKUId = 'B', SKUPrice = 30m });
+                SKUList.Add(new SKU() { SKUId = 'C', SKUPrice = 20m });
+                SKUList.Add(new SKU() { SKUId = 'D', SKUPrice = 15m });
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
         }
         public void FillPromoList()
         {
-            //Populate all the Promotions
-            PromoList = new List<Promotion>();
-            PromoList.Add(new Promotion()
+            try
             {
-                SKU1 = 'A',
-                SKU1Unit = 3,
-                PromoPrice = 130
-            });
-            PromoList.Add(new Promotion()
+                //Populate all the Promotions
+                PromoList = new List<Promotion>();
+                PromoList.Add(new Promotion()
+                {
+                    SKU1 = 'A',
+                    SKU1Unit = 3,
+                    PromoPrice = 130
+                });
+                PromoList.Add(new Promotion()
+                {
+                    SKU1 = 'B',
+                    SKU1Unit = 2,
+                    PromoPrice = 45
+                });
+                PromoList.Add(new Promotion()
+                {
+                    SKU1 = 'C',
+                    SKU1Unit = 1,
+                    SKU2 = 'D',
+                    SKU2Unit = 1,
+                    PromoPrice = 30
+                });
+            }
+            catch (Exception ex)
             {
-                SKU1 = 'B',
-                SKU1Unit = 2,
-                PromoPrice = 45
-            });
-            PromoList.Add(new Promotion()
-            {
-                SKU1 = 'C',
-                SKU1Unit = 1,
-                SKU2 = 'D',
-                SKU2Unit = 1,
-                PromoPrice = 30
-            });
+                throw ex;
+            }
         }
         public (decimal actualPrice, decimal promoPrice) PromoCalculator()
         {
             decimal actualPrice = 0m, promoPrice = 0m, sku1Price = 0m, sku2Price = 0m;
             bool promoApplied = false;
-            foreach (var cartItem in CartList.FindAll(c => !c.IsCheckedOut))
+            try
             {
-                //If item is already checkedout, pick next.
-                if (cartItem.IsCheckedOut)
+                foreach (var cartItem in CartList.FindAll(c => !c.IsCheckedOut))
                 {
-                    continue;
-                }
-                promoApplied = false; 
-                sku1Price = SKUList.Find(sku => sku.SKUId == cartItem.SKU).SKUPrice;
-                actualPrice += sku1Price * cartItem.Quantity;
-                foreach (var promotion in PromoList)
-                {
-                    //For promotions with single SKU item
-                    if (promotion.SKU2.Equals('\0'))
+                    //If item is already checkedout, pick next.
+                    if (cartItem.IsCheckedOut)
                     {
-                        if (promotion.SKU1 == cartItem.SKU && promotion.SKU1Unit <= cartItem.Quantity)
-                        {
-                            //Items with promo
-                            promoPrice += promotion.PromoPrice * (cartItem.Quantity / promotion.SKU1Unit);
-
-                            //Items without promo
-                            promoPrice += (cartItem.Quantity % promotion.SKU1Unit) * sku1Price;
-
-                            promoApplied = true;
-
-                            //Check out items
-                            cartItem.IsCheckedOut = true;
-                            break;
-                        }
+                        continue;
                     }
-                    //For promotions with multiple SKU items
-                    else
+                    promoApplied = false;
+                    sku1Price = SKUList.Find(sku => sku.SKUId == cartItem.SKU).SKUPrice;
+                    actualPrice += sku1Price * cartItem.Quantity;
+                    foreach (var promotion in PromoList)
                     {
-                        if (promotion.SKU1 == cartItem.SKU && promotion.SKU1Unit <= cartItem.Quantity)
+                        //For promotions with single SKU item
+                        if (promotion.SKU2.Equals('\0'))
                         {
-                            foreach (var cartItem2 in CartList.FindAll(c => !c.IsCheckedOut))
+                            if (promotion.SKU1 == cartItem.SKU && promotion.SKU1Unit <= cartItem.Quantity)
                             {
-                                if (promotion.SKU2 == cartItem2.SKU && promotion.SKU2Unit <= cartItem2.Quantity)
+                                //Items with promo
+                                promoPrice += promotion.PromoPrice * (cartItem.Quantity / promotion.SKU1Unit);
+
+                                //Items without promo
+                                promoPrice += (cartItem.Quantity % promotion.SKU1Unit) * sku1Price;
+
+                                promoApplied = true;
+
+                                //Check out items
+                                cartItem.IsCheckedOut = true;
+                                break;
+                            }
+                        }
+                        //For promotions with multiple SKU items
+                        else
+                        {
+                            if (promotion.SKU1 == cartItem.SKU && promotion.SKU1Unit <= cartItem.Quantity)
+                            {
+                                foreach (var cartItem2 in CartList.FindAll(c => !c.IsCheckedOut))
                                 {
-                                    sku2Price = SKUList.Find(sku => sku.SKUId == cartItem2.SKU).SKUPrice;
-                                    
-                                    //Number of times a given promotion needs to be applied.
-                                    var totalPromo = Math.Min((cartItem.Quantity / promotion.SKU1Unit), (cartItem2.Quantity / promotion.SKU2Unit));
+                                    if (promotion.SKU2 == cartItem2.SKU && promotion.SKU2Unit <= cartItem2.Quantity)
+                                    {
+                                        sku2Price = SKUList.Find(sku => sku.SKUId == cartItem2.SKU).SKUPrice;
 
-                                    //SKU1 and SKU2 items wit promo
-                                    promoPrice += promotion.PromoPrice * totalPromo;
+                                        //Number of times a given promotion needs to be applied.
+                                        var totalPromo = Math.Min((cartItem.Quantity / promotion.SKU1Unit), (cartItem2.Quantity / promotion.SKU2Unit));
 
-                                    //SKU1 items without promo
-                                    promoPrice += (cartItem.Quantity % promotion.SKU1Unit) * sku1Price;
-                                    
-                                    //SKU2 items without promo
-                                    promoPrice += (cartItem2.Quantity % promotion.SKU2Unit) * sku2Price;
+                                        //SKU1 and SKU2 items wit promo
+                                        promoPrice += promotion.PromoPrice * totalPromo;
 
-                                    promoApplied = true;
+                                        //SKU1 items without promo
+                                        promoPrice += (cartItem.Quantity % promotion.SKU1Unit) * sku1Price;
 
-                                    //Check out items
-                                    cartItem.IsCheckedOut = true;
-                                    CartList.Find(c => c.SKU == cartItem2.SKU).IsCheckedOut = true;
-                                    cartItem2.IsCheckedOut = true;
+                                        //SKU2 items without promo
+                                        promoPrice += (cartItem2.Quantity % promotion.SKU2Unit) * sku2Price;
 
-                                    break;
+                                        promoApplied = true;
+
+                                        //Check out items
+                                        cartItem.IsCheckedOut = true;
+                                        CartList.Find(c => c.SKU == cartItem2.SKU).IsCheckedOut = true;
+                                        cartItem2.IsCheckedOut = true;
+
+                                        break;
+                                    }
                                 }
                             }
                         }
                     }
-                }
 
-                //When no promotion is applied, calculate actual price
-                if (!promoApplied)
-                {
-                    promoPrice += (cartItem.Quantity) * sku1Price;
+                    //When no promotion is applied, calculate actual price
+                    if (!promoApplied)
+                    {
+                        promoPrice += (cartItem.Quantity) * sku1Price;
+                    }
                 }
+            }
+            catch (Exception)
+            {
+
+                throw;
             }
             return (actualPrice, promoPrice);
         }
