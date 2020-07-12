@@ -12,6 +12,11 @@ namespace PromoEngine.BAL
         public List<SKU> SKUList { get; set; }
         public List<Promotion> PromoList { get; set; }
         public List<CartItem> CartList { get; set; }
+        public PromotionEngine()
+        {
+            FillSKUList();
+            FillPromoList();
+        }
         public void FillSKUList()
         {
             //Populate all the SKU items
@@ -46,12 +51,17 @@ namespace PromoEngine.BAL
                 PromoPrice = 30
             });
         }
-        public decimal PromoCalculator()
+        public (decimal actualPrice, decimal promoPrice) PromoCalculator()
         {
             decimal actualPrice = 0m, promoPrice = 0m, sku1Price = 0m, sku2Price = 0m;
             bool promoApplied = false;
-            foreach (var cartItem in CartList)
+            foreach (var cartItem in CartList.FindAll(c => !c.IsCheckedOut))
             {
+                //If item is already checkedout, pick next.
+                if (cartItem.IsCheckedOut)
+                {
+                    continue;
+                }
                 promoApplied = false; 
                 sku1Price = SKUList.Find(sku => sku.SKUId == cartItem.SKU).SKUPrice;
                 actualPrice += sku1Price * cartItem.Quantity;
@@ -69,6 +79,9 @@ namespace PromoEngine.BAL
                             promoPrice += (cartItem.Quantity % promotion.SKU1Unit) * sku1Price;
 
                             promoApplied = true;
+
+                            //Check out items
+                            cartItem.IsCheckedOut = true;
                             break;
                         }
                     }
@@ -77,7 +90,7 @@ namespace PromoEngine.BAL
                     {
                         if (promotion.SKU1 == cartItem.SKU && promotion.SKU1Unit <= cartItem.Quantity)
                         {
-                            foreach (var cartItem2 in CartList)
+                            foreach (var cartItem2 in CartList.FindAll(c => !c.IsCheckedOut))
                             {
                                 if (promotion.SKU2 == cartItem2.SKU && promotion.SKU2Unit <= cartItem2.Quantity)
                                 {
@@ -96,6 +109,12 @@ namespace PromoEngine.BAL
                                     promoPrice += (cartItem2.Quantity % promotion.SKU2Unit) * sku2Price;
 
                                     promoApplied = true;
+
+                                    //Check out items
+                                    cartItem.IsCheckedOut = true;
+                                    CartList.Find(c => c.SKU == cartItem2.SKU).IsCheckedOut = true;
+                                    cartItem2.IsCheckedOut = true;
+
                                     break;
                                 }
                             }
@@ -109,7 +128,7 @@ namespace PromoEngine.BAL
                     promoPrice += (cartItem.Quantity) * sku1Price;
                 }
             }
-            return promoPrice;
+            return (actualPrice, promoPrice);
         }
     }
 
@@ -117,6 +136,7 @@ namespace PromoEngine.BAL
     {
         public char SKU { get; set; }
         public int Quantity { get; set; }
+        public bool IsCheckedOut { get; set; }
     }
 
     public class Promotion

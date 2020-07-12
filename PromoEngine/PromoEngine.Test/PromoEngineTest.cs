@@ -19,10 +19,11 @@ namespace PromoEngine.Test
             //A = 1, B = 1, C = 1
             PromotionEngine promotionEngine = new PromotionEngine();
             FillCartList1(promotionEngine);
-            decimal expectedPrice = 100m;
+            decimal orginalPrice = 100m,expectedPrice = 100m;
 
-            decimal promoPrice = promotionEngine.PromoCalculator();
+            (decimal actualPrice, decimal promoPrice) = promotionEngine.PromoCalculator();
 
+            Assert.Equals(orginalPrice, actualPrice);
             Assert.Equals(expectedPrice, promoPrice);
         }
         [Fact]
@@ -30,11 +31,12 @@ namespace PromoEngine.Test
         {
             //A = 5, B = 5, C = 1
             PromotionEngine promotionEngine = new PromotionEngine();
-            FillCartList2(promotionEngine); 
-            decimal expectedPrice = 370m;
+            FillCartList2(promotionEngine);
+            decimal orginalPrice = 420m, expectedPrice = 370m;
 
-            decimal promoPrice = promotionEngine.PromoCalculator();
+            (decimal actualPrice, decimal promoPrice) = promotionEngine.PromoCalculator();
 
+            Assert.Equals(orginalPrice, actualPrice);
             Assert.Equals(expectedPrice, promoPrice);
         }
         [Fact]
@@ -43,10 +45,11 @@ namespace PromoEngine.Test
             //A = 3, B = 5, C = 1, D = 1
             PromotionEngine promotionEngine = new PromotionEngine();
             FillCartList3(promotionEngine);
-            decimal expectedPrice = 280m;
+            decimal orginalPrice = 335m, expectedPrice = 100m;
 
-            decimal promoPrice = promotionEngine.PromoCalculator();
+            (decimal actualPrice, decimal promoPrice) = promotionEngine.PromoCalculator();
 
+            Assert.Equals(orginalPrice, actualPrice);
             Assert.Equals(expectedPrice, promoPrice);
         }
         public void FillCartList1(PromotionEngine promotionEngine)
