@@ -15,10 +15,36 @@ namespace PromoEngine.BAL
         public void FillSKUList()
         {
             //Populate all the SKU items
+            SKUList = new List<SKU>();
+            SKUList.Add(new SKU() { SKUId = 'A', SKUPrice = 50m });
+            SKUList.Add(new SKU() { SKUId = 'B', SKUPrice = 30m });
+            SKUList.Add(new SKU() { SKUId = 'C', SKUPrice = 20m });
+            SKUList.Add(new SKU() { SKUId = 'D', SKUPrice = 15m });
         }
         public void FillPromoList()
         {
             //Populate all the Promotions
+            PromoList = new List<Promotion>();
+            PromoList.Add(new Promotion()
+            {
+                SKU1 = 'A',
+                SKU1Unit = 3,
+                PromoPrice = 130
+            });
+            PromoList.Add(new Promotion()
+            {
+                SKU1 = 'B',
+                SKU1Unit = 2,
+                PromoPrice = 45
+            });
+            PromoList.Add(new Promotion()
+            {
+                SKU1 = 'C',
+                SKU1Unit = 1,
+                SKU2 = 'D',
+                SKU2Unit = 1,
+                PromoPrice = 30
+            });
         }
         public decimal PromoCalculator()
         {
